@@ -1,0 +1,22 @@
+# Sample .travis.yml for R projects
+# https://github.com/craigcitro/r-travis/wiki#getting-started
+# http://docs.travis-ci.com/user/languages/r/
+
+language: r
+warnings_are_errors: true
+sudo: required
+
+r_github_packages:
+  - jimhester/covr
+
+after_success:
+  - Rscript -e 'library(covr);codecov()'
+  
+env:
+ global:
+   - CRAN: http://cran.rstudio.com
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
