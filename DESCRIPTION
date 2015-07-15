@@ -1,0 +1,36 @@
+Package: NPdata
+Type: Package
+Title: Functions to Automate Downloading Financial and Economic Data Available
+  Through Different Official Government of Nepal Websites
+Version: 0.0.1
+Date: 2015-07-10
+Authors@R:
+  person(given=c("Nayan","Krishna"), family="Joshi",
+  email="nayankrishnajoshi@gmail.com", role=c("aut","cre"))
+Description: Functions to automate downloading financial and economic data
+  available through different official Government of Nepal different official
+  Government of Nepal (GoN) websites. Currently, the package allows you to
+  download stock market data (real time stock quotes, daily historical stock
+  prices and volumes, daily historical indexes, and daily historical floor
+  sheets) from Nepal Stock Exchange (NEPSE) and daily historical foreign
+  exchange rates from Nepal Rastra Bank.
+Depends:
+    R (>= 3.2.1),
+    xml2,
+    httr,
+    rvest,
+    curl
+Imports:
+    xml2 (>= 0.1.1),
+    httr (>= 1.0.0),
+    rvest (>= 0.2.0.9000),
+    curl (>= 0.9),
+    xts (>= 0.9.7),
+    dygraphs (>= 0.4.5),
+    data.table (>= 1.9.4),
+    quantmod (>= 0.4.4)
+Suggests:
+License: GPL-3
+LazyData: TRUE
+URL: https://github.com/nayanj/NPdata
+BugReports: https://github.com/nayanj/NPdata/issues
