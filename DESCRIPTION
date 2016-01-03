@@ -15,7 +15,7 @@ Description: Functions to automate downloading financial and economic data
   sheets) from Nepal Stock Exchange (NEPSE) and daily historical foreign
   exchange rates from Nepal Rastra Bank.
 Depends:
-    R (>= 3.0.0),
+    R (>= 3.2.0),
     xml2,
     httr,
     rvest,
