@@ -9,6 +9,9 @@
 \item{index_name}{Name of index or sub-index}
 \item{index_id}{ID of index or sub_index which ranges from 51 to 63}
 }}
+\source{
+\url{http://www.nepalstock.com.np/}
+}
 \usage{
 nepse_index_id
 }

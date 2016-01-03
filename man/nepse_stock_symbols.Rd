@@ -13,6 +13,9 @@ non-ordinary share}
 \item{stock_id}{Stock id of the company listed in the NEPSE}
 \item{isin}{international securities identification number}
 }}
+\source{
+\url{http://www.nepalstock.com.np/}
+}
 \usage{
 nepse_stock_symbols
 }
