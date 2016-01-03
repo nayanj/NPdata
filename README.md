@@ -1,4 +1,6 @@
-# NPdata
+# NPdata 
+[![Build Status](https://travis-ci.org/nayanj/NPdata.svg?branch=master)](https://travis-ci.org/nayanj/NPdata)
+
 The R `NPdata` package provides functions to automate downloading financial and economic data available through 
 different official Government of Nepal (GoN) websites. Currently, the package allows you to download data 
 from two sources: 
