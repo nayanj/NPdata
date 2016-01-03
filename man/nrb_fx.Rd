@@ -8,7 +8,7 @@ Buying and Selling Foreign Exchange Rates from Nepal Rastra Bank
 }
 
 \usage{
-nrb_fx(fx_codes = NULL, from = NULL, to = NULL)
+nrb_fx(fx_codes = NULL, from = NULL, to = NULL, showProgress = TRUE)
 }
 \arguments{
        \item{fx_codes}{ a character vector of currency symbols expressed in
@@ -19,6 +19,7 @@ nrb_fx(fx_codes = NULL, from = NULL, to = NULL)
         \item{to}{ end date expressed in ISO CCYY-MM-DD format
                       (e.g., "2015-07-09"). The \code{to} must not be
                      less than the \code{from}}
+       \item{showProgress}{default is TRUE. Displays progress on the console}
 }
 \details{
 The \code{nrb_fx} downloads buying and selling exchange rates for a

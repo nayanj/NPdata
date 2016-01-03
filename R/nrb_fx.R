@@ -1,7 +1,9 @@
-nrb_fx <- function(fx_codes = NULL, from = NULL, to = NULL) {
-
+nrb_fx <- function(fx_codes = NULL, from = NULL, to = NULL, showProgress = TRUE) {
+  
   # data begins only from January 1, 2000; if start date is before '2000-01-01'
   # stop and issue an error with message.
+  # enter the valid day of the month
+  # show progress bar : default = TRUE
 
   # if fx_codes are not supplied issue stop error
   if (missing(fx_codes) || missing(from) || missing(to)) {
@@ -15,6 +17,7 @@ nrb_fx <- function(fx_codes = NULL, from = NULL, to = NULL) {
                      "QAR", "THB", "AED", "MYR", "KPW")
 
   # check whether fx_codes are valid by looking through currency list
+  
   valid_fx_codes <- fx_codes[fx_codes %in% currency_list]
   invalid_fx_codes <- fx_codes[!fx_codes %in% currency_list]
 
@@ -102,24 +105,75 @@ nrb_fx <- function(fx_codes = NULL, from = NULL, to = NULL) {
   MM1 <- substr(to, 6, 7)
   DD <- substr(from, 9, 10)
   DD1 <- substr(to, 9, 10)
-
-  url_FX <- paste0("http://www.nrb.org.np/detailexchrate.php?",
-                   "YY=", YY, "&MM=", MM, "&DD=", DD, "&YY1=", YY1,
-                   "&MM1=", MM1, "&DD1=",
-                   DD1)
-
-  tem1 <- xml2::read_html(url_FX)
-  tem2 <- rvest::html_table(tem1, fill = TRUE, header = FALSE)
-
-  if (difftime(to_date, from_date) == 0) {
-    # if from and to are the same, there is no average row
-    tem3 <- tem2[[7]][-c(as.numeric(head(rownames(tem2[[7]]), 2)),
-                         as.numeric(tail(rownames(tem2[[7]]), 1))), ]
-
-  } else {
-    tem3 <- tem2[[7]][-c(as.numeric(head(rownames(tem2[[7]]), 2)),
-                         as.numeric(tail(rownames(tem2[[7]]), 3))), ]
+  
+  # create ISO date for easy manipulation
+  
+#   iso_from <-ISOdate(YY,MM,DD)
+#   iso_to <-ISOdate(YY1,MM1,DD1)
+#   
+#   diff_iso_year <- year(iso_to) - year(iso_from)
+#   diff_iso_month <- month(iso_to) - month(iso_from)
+#   diff_iso_day <- yday(iso_to) - yday(iso_from)
+  
+  # reduce memory by downloading in chunks (every 1 month) 
+  
+  all_date <- c(seq(from = from_date,by = 30,to = to_date),to_date)
+  
+      
+  if(showProgress){
+    pb <- txtProgressBar(title = "progress bar",min = 0, 
+                             max = length(all_date), style = 3, width = 40)
   }
+        
+        tem3b <- lapply(1:length(all_date),function(x){
+          
+          # show progress bar : default = TRUE)
+          
+          if(showProgress)
+             {setTxtProgressBar(pb, x)
+             }
+    
+      if(x+1 <= length(all_date)){
+        # cat(paste0("downloading the data for ",all_date[x]," to ",all_date[x+1]),"\n")
+      url_FX <- paste0("http://www.nrb.org.np/detailexchrate.php?",
+                       "YY=", substr(all_date[x],1, 4), "&MM=", 
+                       substr(all_date[x],6, 7), "&DD=", 
+                       substr(all_date[x],9, 10), "&YY1=", 
+                       substr(all_date[x+1],1, 4),
+                       "&MM1=", substr(all_date[x+1],6, 7), "&DD1=",
+                       substr(all_date[x+1],9, 10))
+      
+      tem1 <- xml2::read_html(url_FX)
+      tem2 <- rvest::html_table(tem1, fill = TRUE, header = FALSE)
+      
+      if (difftime(as.Date(all_date[x], format = "%Y-%m-%d"), 
+                   as.Date(all_date[x+1], format = "%Y-%m-%d")) == 0) {
+        # if from and to are the same, there is no average row
+        tem3a <- tem2[[7]][-c(as.numeric(head(rownames(tem2[[7]]), 2)),
+                             as.numeric(tail(rownames(tem2[[7]]), 1))), ]
+        return(tem3a)
+      }else{
+        
+        tem3a <- tem2[[7]][-c(as.numeric(head(rownames(tem2[[7]]), 2)),
+                             as.numeric(tail(rownames(tem2[[7]]), 3))), ]
+        return(tem3a)
+      }
+      rm(url_FX,tem1,tem2)
+      return(tem3a)
+    }
+          })
+
+        # close the progress bar
+        
+        if(showProgress){
+        close(pb)
+}
+      tem3 <- as.data.frame(
+                  do.call(
+                    rbind,tem3b))
+      rm(tem3b)
+
+
   names(tem3) <- c("FX_Date", "INR BUY", "INR SELL", "USD BUY", "USD SELL",
                    "EUR BUY", "EUR SELL", "GBP BUY", "GBP SELL", "CHF BUY",
                    "CHF SELL", "AUD BUY", "AUD SELL", "CAD BUY", "CAD SELL",
@@ -130,13 +184,14 @@ nrb_fx <- function(fx_codes = NULL, from = NULL, to = NULL) {
                    "KPW SELL")
   tem4 <- tem3[, c("FX_Date", unique(grep(paste(fx_codes, collapse = "|"),
                                           names(tem3), value = TRUE)))]
-  rm(tem1, tem2, tem3)
+  rm(tem3)
 
   names(tem4)[-1] <- sub(" ", "_", names(tem4)[-1])
 
   tem5 <- reshape(tem4, varying = names(tem4)[-1], direction = "long",
                   v.names = "exchange_rate",
                   timevar = "currency", times = names(tem4)[-1])
+  
   # replace currency var with currency and buy_sell by reshaping and remove
   # also id
   tem6 <- data.frame(
@@ -146,6 +201,7 @@ nrb_fx <- function(fx_codes = NULL, from = NULL, to = NULL) {
           rbind, strsplit(tem5$currency, "_")), stringsAsFactors = FALSE)))
 
   # remove currency and id columns
+  
   tem6$currency <- NULL
   tem6$id <- NULL
   # rename the tem6 columns
